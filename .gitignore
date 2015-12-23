@@ -1,0 +1,23 @@
+
+# OS X / Windows
+.DS_Store
+ehthumbs.db
+Icon?
+Thumbs.db
+*~
+
+# Resources
+node_modules
+
+# Editors
+*.iml
+*.ipr
+*.iws
+.idea
+*.iml
+
+# Generated
+dist/
+
+# NPM
+npm-debug.log
