@@ -30,7 +30,7 @@
 
     var doBundle = function(b) {
         return b.
-            transform('babelify', {presets: ["es2015", "react"]}).
+            //transform('babelify', {presets: ["es2015", "react"]}).
             bundle().
             pipe(source('app.js')).
             pipe(buffer()).
