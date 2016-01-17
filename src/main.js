@@ -8,27 +8,19 @@ const MenuItem = electron.MenuItem;
 const Tray = electron.Tray;
 const nativeImage = electron.nativeImage;
 const UserPreferences = require('./preferences/userPreferences');
-
 const server = require('./server');
-
-// Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the JavaScript object is garbage collected.
-let mainWindow;
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
 // On OS X it is common for applications and their menu bar
 // to stay active until the user quits explicitly with Cmd + Q
-
     if (process.platform != 'darwin') {
         app.quit();
     }
 });
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
+// Global references
 let appIcon;
-
 let preferencesWindow;
 
 app.on('ready', () => {
@@ -36,7 +28,7 @@ app.on('ready', () => {
     appIcon = new Tray(img);
     let item = new MenuItem({
         label: 'Launch Web Interface',
-        click: function() {
+        click() {
             childProcess.exec('open http://localhost:8000');
         }
     });
@@ -44,11 +36,11 @@ app.on('ready', () => {
     preferencesWindow = new BrowserWindow({ width: 500, height: 600, show: false });
 
     let launchPreferences = function() {
-        UserPreferences.loadFromFile('/Users/christianbenincasa/Desktop/prefs.json').then(function(prefs) {
+        UserPreferences.loadFromFile('/Users/christianbenincasa/Desktop/prefs.json').then((prefs) => {
             console.log(prefs);
             preferencesWindow.loadUrl('localhost:3000/library');
             preferencesWindow.show();
-        }).catch(function(err) {
+        }).catch((err) => {
             console.error(err);
         });
     };

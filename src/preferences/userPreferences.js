@@ -4,10 +4,10 @@
     const fs = require('fs');
     const Q = require('q');
 
-    var inner = Symbol();
+    let globalPreferences;
+
     class UserPreferences {
         constructor(json) {
-            this[inner] = json;
             this.loaded = true;
         }
 
@@ -15,6 +15,15 @@
             return Q.denodeify(fs.readFile)(filePath, 'UTF-8').then(function(json) {
                 return new UserPreferences(json);
             });
+        }
+
+        static getGlobalPreferences() {
+            if (!globalPreferences) {
+                // TODO: Add file path
+                globalPreferences = UserPreferences.loadFromFile('');
+            }
+
+            return globalPreferences;
         }
     }
 
