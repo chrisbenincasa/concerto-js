@@ -1,7 +1,19 @@
-(function() {
-    "use strict";
+var React = require('react'),
+    ReactDOM = require('react-dom');
 
-    var logger = require('./test');
+var CommentBox = React.createClass({
+    render() {
+        return (
+            <div className="commentBox">
+                Hello, world! I am a CommentBox.
+            </div>
+        );
+    }
+});
 
-    logger.log('test');
-})();
+console.log('hey')
+
+ReactDOM.render(
+    <CommentBox />,
+    document.getElementById('example')
+);

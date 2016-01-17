@@ -4,6 +4,7 @@
 
     var gulp = require('gulp'),
         babel = require('gulp-babel'),
+        eventStream = require('event-stream'),
         electron = require('electron-prebuilt'),
         childProcess= require('child_process'),
         browserify = require('browserify'),
@@ -13,32 +14,56 @@
         uglify = require('gulp-uglify'),
         sourcemaps = require('gulp-sourcemaps'),
         gutil = require('gulp-util'),
-        livereload = require('gulp-livereload');
+        livereload = require('gulp-livereload'),
+        async = require('async'),
+        q = require('q'),
+        build = require('./build.json');
 
     var getBundler = function(watch) {
-        var b = browserify({
-            entries: './src/client/index.js',
-            debug: true
+        var defer = q.defer();
+
+        async.map(build.bundles, function(bundle, cb) {
+            var b = browserify({
+                entries: bundle.in,
+                debug: true
+            });
+
+            if (watch) {
+                b = watchify(b);
+            }
+
+            cb(null, {
+                bundle: b,
+                out: bundle.out
+            });
+        }, function(err, results) {
+            if (err) {
+                defer.reject(err);
+            } else {
+                defer.resolve(results);
+            }
         });
 
-        if (watch) {
-            b = watchify(b);
-        }
-
-        return b;
+        return defer.promise;
     };
 
     var doBundle = function(b) {
-        return b.
-            //transform('babelify', {presets: ["es2015", "react"]}).
+        var start = new Date().getTime();
+
+        return b.bundle.
+            transform('babelify', { presets: ["es2015", "react"] }).
             bundle().
-            pipe(source('app.js')).
+            pipe(source(b.out)).
             pipe(buffer()).
-            pipe(sourcemaps.init({loadMaps: true})).
+            pipe(sourcemaps.init({ loadMaps: true })).
             pipe(uglify()).
             on('error', gutil.log).
             pipe(sourcemaps.write('./')).
-            pipe(gulp.dest('./dist/js/'));
+            pipe(gulp.dest('./dist/js/')).
+            on('end', function() {
+                var end = new Date().getTime();
+                console.log('Completed bundle: \'' + b.out + '\' in ' + (end - start) + ' milliseconds.');
+            });
     };
 
     gulp.task('launch', ['watch'], function() {
@@ -47,18 +72,28 @@
         });
     });
 
-    gulp.task('javascript', function() {
-        return doBundle(getBundler());
+    gulp.task('javascript', function(cb) {
+        getBundler(false).then(function(bundles) {
+            eventStream.merge(
+                bundles.map(function(bundle) { return doBundle(bundle); })
+            ).on('end', cb);
+        });
     });
 
-    gulp.task('watch', function() {
-        var bundle = getBundler(true);
+    gulp.task('watch', function(cb) {
+        getBundler(/** watch **/ true).then(function(bundles) {
+            bundles.forEach(function(bundle) {
+                bundle.bundle.on('update', function() {
+                    doBundle(bundle);
+                    console.log('Rebuilding bundle ' + bundle.out + '...');
+                });
+            });
 
-        bundle.on('update', function() {
-            doBundle(bundle);
-            console.log('doBundle...');
+            eventStream.merge(
+                bundles.map(function(bundle) {
+                    return doBundle(bundle)
+                })
+            ).on('end', cb);
         });
-
-        return doBundle(bundle);
     });
 })();

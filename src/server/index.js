@@ -14,7 +14,7 @@
         var start = new Date;
         yield next;
         var ms = new Date - start;
-        console.log('%s %s - %sms', this.method, this.url, ms);
+        console.log('%s %s (%s) - %sms', this.method, this.response.status, this.url, ms);
     });
 
     app.use(views(viewPath));
@@ -27,8 +27,11 @@
     });
 
     const libraryRouter = require('./routes/library')();
+    const preferencesRouter = require('./routes/preferences')();
 
-    router.use(libraryRouter.routes(), libraryRouter.allowedMethods());
+    [libraryRouter, preferencesRouter].forEach((r) => {
+        router.use(r.routes(), r.allowedMethods());
+    });
 
     app.use(router.routes()).use(router.allowedMethods());
 

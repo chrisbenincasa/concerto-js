@@ -33,12 +33,11 @@ app.on('ready', () => {
         }
     });
 
-    preferencesWindow = new BrowserWindow({ width: 500, height: 600, show: false });
+    preferencesWindow = new BrowserWindow({ width: 500, height: 600, show: false, resizable: false });
 
     let launchPreferences = function() {
-        UserPreferences.loadFromFile('/Users/christianbenincasa/Desktop/prefs.json').then((prefs) => {
-            console.log(prefs);
-            preferencesWindow.loadUrl('localhost:3000/library');
+        UserPreferences.loadFromFile('/Users/christianbenincasa/Desktop/prefs.json').then(() => {
+            preferencesWindow.loadUrl('file://' + __dirname + '/views/preferences.html');
             preferencesWindow.show();
         }).catch((err) => {
             console.error(err);
