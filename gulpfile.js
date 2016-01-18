@@ -17,7 +17,12 @@
         livereload = require('gulp-livereload'),
         async = require('async'),
         q = require('q'),
-        build = require('./build.json');
+        _ = require('underscore'),
+        envify = require('envify/custom'),
+        build = require('./build.js');
+
+    //var production = process.env.NODE_ENV === 'production';
+    var production = true;
 
     var getBundler = function(watch) {
         var defer = q.defer();
@@ -25,7 +30,10 @@
         async.map(build.bundles, function(bundle, cb) {
             var b = browserify({
                 entries: bundle.in,
-                debug: true
+                debug: production,
+                cache: watch ? {} : undefined,
+                packageCache: watch ? {} : undefined,
+                fullPaths: watch
             });
 
             if (watch) {
@@ -52,6 +60,7 @@
 
         return b.bundle.
             transform('babelify', { presets: ["es2015", "react"] }).
+            transform('envify', { NODE_ENV: 'production' }).
             bundle().
             pipe(source(b.out)).
             pipe(buffer()).
@@ -66,9 +75,11 @@
             });
     };
 
-    gulp.task('launch', ['watch'], function() {
+    gulp.task('launch', ['watch'], function(cb) {
         childProcess.spawn(electron, ['src/main.js'], {
             stdio: 'inherit'
+        }).on('exit', function() {
+            process.exit();
         });
     });
 
@@ -83,10 +94,10 @@
     gulp.task('watch', function(cb) {
         getBundler(/** watch **/ true).then(function(bundles) {
             bundles.forEach(function(bundle) {
-                bundle.bundle.on('update', function() {
+                bundle.bundle.on('update', _.debounce(function() {
                     doBundle(bundle);
                     console.log('Rebuilding bundle ' + bundle.out + '...');
-                });
+                }, 200));
             });
 
             eventStream.merge(

@@ -1,8 +1,8 @@
 const path = require('path');
-const root = path.resolve(__dirname, '..');
 
 function requireRoot(fileName) {
-    let abs = path.resolve(root, fileName);
+    console.log(__dirname, process.cwd());
+    let abs = path.resolve(__dirname, fileName);
     return require(abs);
 }
 

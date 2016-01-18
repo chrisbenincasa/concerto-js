@@ -1,29 +1,31 @@
 const React = require('react'),
-      ReactDOM = require('react-dom');
+      ReactDOM = require('react-dom'),
+      FileInput = require('../common/FileInput');
 
-var CommentBox = React.createClass({
+var PreferencesPanel = React.createClass({
     getInitialState() {
-        return { name: 'dingus' }
+        return {
+            chosenFilePath: '',
+            loading: true
+        }
     },
     handleNameChange(e) {
         this.setState({ name: e.target.value });
     },
+    handleDirectoryChosen(e) {
+        this.setState({ chosenFilePath: e.target.files[0].path });
+    },
     render() {
         return (
-            <div className="commentBox">
-                Hello, world! I am a {this.state.name}.
-                <br />
-                <input type="text"
-                       placeholder="dingus"
-                       value={this.state.name}
-                       onChange={this.handleNameChange}
-                />
+            <div className="preferences-container">
+                Chosen filepath = {this.state.chosenFilePath}
+                <FileInput directory="true" onChange={this.handleDirectoryChosen} />
             </div>
         );
     }
 });
 
 ReactDOM.render(
-    <CommentBox />,
-    document.getElementById('example')
+    <PreferencesPanel />,
+    document.getElementById('preferences-panel')
 );

@@ -2,17 +2,18 @@
     "use strict";
 
     const fs = require('fs');
-    const Q = require('q');
+    const q = require('q');
 
     let globalPreferences;
 
     class UserPreferences {
         constructor(json) {
+            this.raw = json;
             this.loaded = true;
         }
 
         static loadFromFile(filePath) {
-            return Q.denodeify(fs.readFile)(filePath, 'UTF-8').then(function(json) {
+            return q.denodeify(fs.readFile)(filePath, 'UTF-8').then(function(json) {
                 return new UserPreferences(json);
             });
         }
@@ -20,10 +21,13 @@
         static getGlobalPreferences() {
             if (!globalPreferences) {
                 // TODO: Add file path
-                globalPreferences = UserPreferences.loadFromFile('');
+                return UserPreferences.loadFromFile('/Users/christianbenincasa/Desktop/prefs.json').then((json) => {
+                    globalPreferences = json;
+                    return json;
+                });
             }
 
-            return globalPreferences;
+            return q.when(globalPreferences);
         }
     }
 
