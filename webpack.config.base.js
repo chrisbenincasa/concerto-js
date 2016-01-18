@@ -11,8 +11,6 @@ let entries = build.bundles.map((bundle) => {
     return _.extend(prev, curr);
 }, {});
 
-console.log(entries);
-
 module.exports = {
     module: {
         loaders: [{

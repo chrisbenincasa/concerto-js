@@ -10,7 +10,7 @@ var config = _.extend({}, baseConfig);
 
 config.debug = true;
 
-config.devtool = 'cheap-module-eval-source-map';
+config.devtool = 'source-map';
 
 config.output.publicPath = 'http://localhost:3000/dist/';
 

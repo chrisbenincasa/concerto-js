@@ -11,8 +11,6 @@ var config = _.extend({}, baseConfig);
 
 config.devtool = 'source-map';
 
-config.output.publicPath = '../dist/';
-
 config.module.loaders.push({
     test: /^((?!\.module).)*\.css$/,
     loader: ExtractTextPlugin.extract(
