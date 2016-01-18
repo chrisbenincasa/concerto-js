@@ -33,8 +33,6 @@
                 value: e.target.value.split(/(\\|\/)/g).pop()
             });
 
-            console.log(e.target.files);
-
             if (this.props.onChange) {
                 this.props.onChange(e);
             }
@@ -66,7 +64,7 @@
                     <input type="text"
                            tabIndex="-1"
                            name={this.props.name + '_filename'}
-                           value={this.state.value}
+                           value={this.state.value || this.props.value}
                            className={this.props.className}
                            onChange={noop}
                            placeholder={this.props.placeholder}

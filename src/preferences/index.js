@@ -11,22 +11,30 @@ var PreferencesPanel = React.createClass({
         UserPreferences.getGlobalPreferences().then((prefs) => {
             self.setState({
                 loading: false,
-                config: prefs.raw
-            })
+                config: prefs.raw,
+                lastConfig: prefs.raw
+            });
         });
     },
     getInitialState() {
         return {
+            lastConfig: {},
             config: {},
-            chosenFilePath: '',
             loading: true
         }
     },
-    handleNameChange(e) {
-        this.setState({ name: e.target.value });
-    },
     handleDirectoryChosen(e) {
-        this.setState({ chosenFilePath: e.target.files[0].path });
+        this.setState({ config: { chosenFilePath: e.target.files[0].path }});
+    },
+    handleApply() {
+        let self = this;
+        let prefs = {
+            chosenFilePath: this.state.chosenFilePath
+        };
+
+        UserPreferences.saveGlobalPreferences(prefs).then((newPrefs) => {
+            self.setState({ config: newPrefs.raw });
+        });
     },
     render() {
         let loading;
@@ -41,14 +49,15 @@ var PreferencesPanel = React.createClass({
             <div className="preferences-container">
                 {loading}
                 <br/>
-                Chosen filepath = {this.state.chosenFilePath}
-                <FileInput directory="true" onChange={this.handleDirectoryChosen} />
+                Chosen filepath = {this.state.config.chosenFilePath}
+                <FileInput directory="true" onChange={this.handleDirectoryChosen} value={this.state.config.chosenFilePath} />
+                <div>
+                    <button onClick={this.handleApply}>Apply</button>
+                </div>
             </div>
         );
     }
 });
-
-//console.log('hehehehehe')
 
 ReactDOM.render(
     <PreferencesPanel />,
