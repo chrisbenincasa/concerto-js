@@ -13,7 +13,7 @@
         }
 
         static loadFromFile(filePath) {
-            return q.denodeify(fs.readFile)(filePath, 'UTF-8').then(function(json) {
+            return q.denodeify(fs.readFile)(filePath, 'UTF-8').then((json) => {
                 return new UserPreferences(json);
             });
         }

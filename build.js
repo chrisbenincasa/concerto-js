@@ -11,7 +11,8 @@
         "bundles": [
             {
                 "in": [
-                    "./src/client/index.js"
+                    "./src/client/index.js",
+                    "./src/preferences/index.js"
                 ],
                 "out": "client.js"
             }, {
