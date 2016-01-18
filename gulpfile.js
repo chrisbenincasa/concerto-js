@@ -10,6 +10,7 @@
         gutil = require('gulp-util'),
         async = require('async'),
         q = require('q'),
+        _ = require('underscore'),
         build = require('./build.js');
 
     //var production = process.env.NODE_ENV === 'production';
@@ -26,7 +27,11 @@
 
         doneFunc = doneFunc || function() {};
 
-        return gulp.src(build.bundles[0].in).
+        var srcs = _.chain(build.bundles).map(function(bundle) {
+            return _(bundle.in).values();
+        }).flatten().value();
+
+        return gulp.src(srcs).
             pipe(webpackStream(config, webpack, doneFunc)).
             pipe(gulp.dest('./dist'));
     };

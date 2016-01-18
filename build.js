@@ -1,24 +1,15 @@
 (() => {
-    var noParseLibs = [
-        'react',
-        'react-dom'
-    ].map((lib) => {
-        return require.resolve(lib);
-    });
-
     module.exports = {
-        "noParseLibs": noParseLibs,
         "bundles": [
             {
-                "in": [
-                    "./src/client/index.js",
-                    "./src/preferences/index.js"
-                ],
+                "in": {
+                    client: "./src/client/index.js"
+                },
                 "out": "client.js"
             }, {
-                "in": [
-                    "./src/preferences/index.js"
-                ],
+                "in": {
+                    preferences: "./src/preferences/index.js"
+                },
                 "out": "preferences.js"
             }
         ]
