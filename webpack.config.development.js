@@ -2,7 +2,6 @@
 'use strict';
 
 const webpack = require('webpack');
-const webpackTargetElectronRenderer = require('webpack-target-electron-renderer');
 const baseConfig = require('./webpack.config.base');
 const _ = require('underscore');
 
@@ -40,8 +39,5 @@ config.plugins.push(
     }),
     new webpack.SourceMapDevToolPlugin()
 );
-
-//config.target = webpackTargetElectronRenderer(config);
-//config.target = 'electron';
 
 module.exports = config;

@@ -4,7 +4,6 @@
     var gulp = require('gulp'),
         electron = require('electron-prebuilt'),
         childProcess = require('child_process'),
-        watchify = require('watchify'),
         gutil = require('gulp-util'),
         async = require('async'),
         q = require('q'),
@@ -17,7 +16,9 @@
     var production = false;
     var productionImport = './webpack.config.' + (production ? 'production' : 'development') + '.js';
 
-    var webpackPipe = function(watch, doneFunc) {
+    var webpackPromise = q.denodeify(webpack);
+
+    var webpackPipe = function(watch) {
         var config = require(productionImport);
         config.watch = watch;
 
@@ -25,16 +26,11 @@
             return _.extend({}, config, buildConfig);
         });
 
-        doneFunc = doneFunc || function() {};
-
-        return webpack(buildConfigs, doneFunc);
+        return webpackPromise(buildConfigs);
     };
 
-    gulp.task('webpack', function(cb) {
-        return webpackPipe(false, function(err) {
-            if (err) console.error(err);
-            cb();
-        });
+    gulp.task('webpack', function() {
+        return webpackPipe(false);
     });
 
     gulp.task('webpack-dev-server', function(callback) {
@@ -58,18 +54,21 @@
         callback();
     });
 
-    gulp.task('launch', function(cb) {
+    gulp.task('launch', function() {
         var once = true;
-        webpackPipe(true, function() {
+        return webpackPipe(true).then(function() {
+            var deferred = q.defer();
+
             if (once) {
-                childProcess.spawn(electron, ['src/main.js'], {
-                    stdio: 'inherit'
-                }).on('exit', function() {
-                    cb();
-                    process.exit();
-                });
+                childProcess.spawn(electron, ['src/main.js'], { stdio: 'inherit' }).
+                    on('exit', function() {
+                        deferred.resolve();
+                        process.exit();
+                    });
                 once = false;
             }
+
+            return deferred.promise;
         });
     });
 })();
