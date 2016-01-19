@@ -1,6 +1,5 @@
 const React = require('react'),
       ReactDOM = require('react-dom'),
-      fs = require('fs'),
       UserPreferences = require('./userPreferences'),
       FileInput = require('../common/FileInput');
 

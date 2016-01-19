@@ -2,14 +2,6 @@
 'use strict';
 
 const path = require('path');
-const build = require('./build');
-const _ = require('underscore');
-
-let entries = build.bundles.map((bundle) => {
-    return bundle.in;
-}).reduce((prev, curr) => {
-    return _.extend(prev, curr);
-}, {});
 
 module.exports = {
     module: {
@@ -22,12 +14,10 @@ module.exports = {
             }
         }]
     },
-    entry: entries,
     output: {
         path: path.join(__dirname, 'dist'),
-        filename: '[name].bundle.js',
         chunkFilename: '[id].bundle.js',
-        libraryTarget: 'commonjs2'
+        libraryTarget: 'umd'
     },
     resolve: {
         extensions: ['', '.js', '.jsx'],

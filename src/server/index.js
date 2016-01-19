@@ -4,6 +4,7 @@
     const _ = require('underscore');
     const koa = require('koa');
     const router = require('koa-router')();
+    const serve = require('koa-static-folder');
     const views = require('koa-views');
     const path = require('path');
     const app = koa();
@@ -16,6 +17,8 @@
         var ms = new Date - start;
         console.log('%s %s (%s) - %sms', this.method, this.response.status, this.url, ms);
     });
+
+    app.use(serve('./dist'));
 
     app.use(views(viewPath));
 

@@ -42,6 +42,6 @@ config.plugins.push(
 );
 
 //config.target = webpackTargetElectronRenderer(config);
-config.target = 'electron';
+//config.target = 'electron';
 
 module.exports = config;

@@ -7,7 +7,7 @@
         const router = new Router({ prefix: '/library' });
 
         router.get('/', function *() {
-            this.body = 'Hello from the library';
+            yield this.render('library');
         });
 
         return router;

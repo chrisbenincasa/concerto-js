@@ -3,41 +3,38 @@
 
     var gulp = require('gulp'),
         electron = require('electron-prebuilt'),
-        childProcess= require('child_process'),
+        childProcess = require('child_process'),
         watchify = require('watchify'),
-        source = require('vinyl-source-stream'),
-        buffer = require('vinyl-buffer'),
         gutil = require('gulp-util'),
         async = require('async'),
         q = require('q'),
         _ = require('underscore'),
-        build = require('./build.js');
+        tap = require('gulp-tap'),
+        build = require('./build.js'),
+        webpack = require('webpack');
 
     //var production = process.env.NODE_ENV === 'production';
     var production = false;
     var productionImport = './webpack.config.' + (production ? 'production' : 'development') + '.js';
 
-    var webpack = require("webpack"),
-        webpackStream = require('webpack-stream');
-
     var webpackPipe = function(watch, doneFunc) {
         var config = require(productionImport);
-
         config.watch = watch;
+
+        var buildConfigs = _(build.configs).map(function(buildConfig) {
+            return _.extend({}, config, buildConfig);
+        });
 
         doneFunc = doneFunc || function() {};
 
-        var srcs = _.chain(build.bundles).map(function(bundle) {
-            return _(bundle.in).values();
-        }).flatten().value();
-
-        return gulp.src(srcs).
-            pipe(webpackStream(config, webpack, doneFunc)).
-            pipe(gulp.dest('./dist'));
+        return webpack(buildConfigs, doneFunc);
     };
 
-    gulp.task('webpack', function() {
-        return webpackPipe(false);
+    gulp.task('webpack', function(cb) {
+        return webpackPipe(false, function(err) {
+            if (err) console.error(err);
+            cb();
+        });
     });
 
     gulp.task('webpack-dev-server', function(callback) {
