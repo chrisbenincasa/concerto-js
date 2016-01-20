@@ -7,6 +7,19 @@
 <body>
     <div id="library"></div>
 
-    <script src="/dist/client-web.bundle.js"></script>
+    <script>
+        if (typeof require !== 'function') {
+            // If we are in a web env
+            var script = document.createElement('script');
+            script.src = './dist/client-web.bundle.js';
+            document.currentScript.parentNode.insertBefore(script, document.currentScript);
+        } else {
+//            var path = require('path');
+//            require(path.resolve(__dirname, '../../dist/client-electron.bundle.js'));
+            var script = document.createElement('script');
+            script.src = 'dist/client-electron.bundle.js';
+            document.currentScript.parentNode.insertBefore(script, document.currentScript);
+        }
+    </script>
 </body>
 </html>

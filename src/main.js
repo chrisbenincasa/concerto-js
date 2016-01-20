@@ -22,10 +22,18 @@ app.on('window-all-closed', () => {
 // Global references
 let appIcon;
 let preferencesWindow;
+let playerWindow;
 
 app.on('ready', () => {
     let img = nativeImage.createFromPath(process.cwd() + '/images/icon.png');
     appIcon = new Tray(img);
+    let appInterfaceManuItem = new MenuItem({
+        label: 'Launch Player',
+        click() {
+            playerWindow.loadUrl(`file://${__dirname}/views/library.html`);
+            playerWindow.show();
+        }
+    });
     let item = new MenuItem({
         label: 'Launch Web Interface',
         click() {
@@ -33,6 +41,7 @@ app.on('ready', () => {
         }
     });
 
+    playerWindow = new BrowserWindow({ width: 500, height: 600, show: false, resizable: true });
     preferencesWindow = new BrowserWindow({ width: 500, height: 600, show: false, resizable: false });
 
     let launchPreferences = function() {
@@ -47,6 +56,7 @@ app.on('ready', () => {
     var contextMenu = Menu.buildFromTemplate([
         new MenuItem({ label: 'Preferences...', click: launchPreferences }),
         new MenuItem({ type: 'separator' }),
+        appInterfaceManuItem,
         item,
         new MenuItem({ type: 'separator' }),
         new MenuItem({ label: 'Quit' })
