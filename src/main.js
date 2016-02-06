@@ -37,7 +37,7 @@ app.on('ready', () => {
     let item = new MenuItem({
         label: 'Launch Web Interface',
         click() {
-            childProcess.exec('open http://localhost:8000');
+            childProcess.exec('open http://localhost:3000');
         }
     });
 
@@ -59,7 +59,7 @@ app.on('ready', () => {
         appInterfaceManuItem,
         item,
         new MenuItem({ type: 'separator' }),
-        new MenuItem({ label: 'Quit' })
+        new MenuItem({ label: 'Quit', click: () => app.quit() })
     ]);
     appIcon.setToolTip('This is my application.');
     appIcon.setContextMenu(contextMenu);

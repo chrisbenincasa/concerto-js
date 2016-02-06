@@ -4,7 +4,8 @@
   "description": "Music",
   "main": "main.js",
   "scripts": {
-    "start": "electron src/main.js"
+    "start": "electron src/main.js",
+    "install": "./node_modules/.bin/electron-rebuild"
   },
   "repository": {
     "type": "git",
@@ -24,6 +25,7 @@
     "babelify": "^7.2.0",
     "clone": "^1.0.2",
     "electron-prebuilt": "^0.36.0",
+    "electron-rebuild": "^1.1.1",
     "extract-text-webpack-plugin": "^1.0.1",
     "globby": "^4.0.0",
     "gulp": "3.9.0",
@@ -41,6 +43,7 @@
   "dependencies": {
     "babel-preset-react": "^6.3.13",
     "co-fs": "^1.2.0",
+    "jquery": "^2.2.0",
     "koa": "^1.1.2",
     "koa-router": "^5.3.0",
     "koa-static-folder": "^0.1.6",
@@ -48,6 +51,7 @@
     "q": "^1.4.1",
     "react": "^0.14.6",
     "react-dom": "^0.14.6",
+    "sqlite3": "https://github.com/mapbox/node-sqlite3/tarball/master",
     "superagent": "^1.6.1",
     "underscore": "^1.8.3"
   }

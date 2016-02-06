@@ -16,17 +16,43 @@
     var production = false;
     var productionImport = './webpack.config.' + (production ? 'production' : 'development') + '.js';
 
-    var webpackPromise = q.denodeify(webpack);
-
-    var webpackPipe = function(watch) {
+    var webpackPipe = function(watch, watchOptions) {
+        var deferred = q.defer();
         var config = require(productionImport);
+        watchOptions = watchOptions || {};
         config.watch = watch;
+
+        if (watch) {
+            console.log('Watching webpack configuration...');
+        }
 
         var buildConfigs = _(build.configs).map(function(buildConfig) {
             return _.extend({}, config, buildConfig);
         });
 
-        return webpackPromise(buildConfigs);
+        var compiler = webpack(buildConfigs, function() {
+            deferred.resolve({});
+        });
+
+        if (watch) {
+            if (compiler.compilers) {
+                compiler.compilers.forEach(function(c) {
+                    var filename = c.options.output.filename.replace(/\[name]/, c.options.name);
+                    c.watch(watchOptions, function(err, stats) {
+                        var execTime = stats.endTime - stats.startTime;
+                        console.log('Successfully recompiled bundle ' + filename + ' in ' + execTime + ' (ms).');
+                    });
+                });
+            } else {
+                var filename = compiler.options.output.filename.replace(/\[name]/, compiler.options.name);
+                compiler.watch(watchOptions, function(err, stats) {
+                    console.log('Successfully recompiled bundle ' + filename + '.');
+                });
+            }
+        }
+
+
+        return deferred.promise;
     };
 
     gulp.task('webpack', function() {
