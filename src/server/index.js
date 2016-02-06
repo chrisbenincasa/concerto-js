@@ -7,6 +7,7 @@
     const serve = require('koa-static-folder');
     const views = require('koa-views');
     const path = require('path');
+    const bodyParser = require('koa-body-parser');
     const app = koa();
     const viewPath = path.resolve(__dirname, '../views');
     let server;
@@ -21,6 +22,8 @@
     app.use(serve('./dist'));
 
     app.use(views(viewPath));
+
+    app.use(bodyParser());
 
     router.get('/', function *(next) {
         this.body = JSON.stringify({

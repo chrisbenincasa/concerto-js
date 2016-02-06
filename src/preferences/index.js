@@ -1,7 +1,8 @@
 const React = require('react'),
       ReactDOM = require('react-dom'),
       UserPreferences = require('./userPreferences'),
-      FileInput = require('../common/FileInput');
+      FileInput = require('../common/FileInput'),
+      $ = require('jquery');
 
 var PreferencesPanel = React.createClass({
     componentDidMount() {
@@ -23,7 +24,13 @@ var PreferencesPanel = React.createClass({
         }
     },
     handleDirectoryChosen(e) {
-        this.setState({ config: { chosenFilePath: e.target.files[0].path }});
+        this.setState({ config: { chosenFilePath: e.target.files[0].path }}, () => {
+            $.ajax({
+                url: 'http://localhost:3000/preferences',
+                method: 'POST',
+                data: this.state.config
+            });
+        });
     },
     handleApply() {
         let self = this;
