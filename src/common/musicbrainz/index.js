@@ -26,6 +26,7 @@
     const RELATIONSHIPS = RESOURCES.map((res) => `${res}-rels`);
     const USER_AGENT = 'concerto-js/0.0.1 (chrisbenincasa@gmail.com)';
     const MAIN_ENDPOINT = 'http://musicbrainz.org/ws/2/';
+    const LUCENE_SPECIAL = /([+\-&|!(){}\[\]\^"~*?:\\\/])/;
 
     const makeUrl = function(path, params) {
         params.fmt = 'json';
@@ -51,11 +52,55 @@
                 return;
             }
 
-            deferred.resolve(JSON.parse(response));
+            deferred.resolve(JSON.parse(response.body));
         });
 
         return deferred.promise;
     }, 1000);
+
+    const makeSearchQuery = function(query, fields, strict) {
+        let queryParts = [];
+        let fullQuery;
+
+        let normalizedQuery = query.replace(LUCENE_SPECIAL, (m, $1) => '\\' + $1);
+
+        if (fields) {
+            if (strict) {
+                queryParts.push(`"${normalizedQuery}"`)
+            } else {
+                queryParts.push(query.toLowerCase());
+            }
+        } else {
+            queryParts.push(query.toLowerCase());
+        }
+
+        _(fields).each((value, key) => {
+            let fieldValue = value;
+
+            fieldValue = fieldValue.replace(LUCENE_SPECIAL, (m, $1) => `\\${$1}`);
+
+            if (fieldValue) {
+                if (strict) {
+                    queryParts.push(`${key}:"${fieldValue}"`)
+                } else {
+                    fieldValue = fieldValue.toLowerCase();
+                    queryParts.push(`${key}:(${fieldValue})`);
+                }
+            }
+        });
+
+        if (strict) {
+            fullQuery = queryParts.join(' AND ').trim();
+        } else {
+            fullQuery = queryParts.join(' ').trim();
+        }
+
+        if (!fullQuery) {
+            throw new Error
+        }
+
+        return fullQuery;
+    };
 
     const doQueryRequest = function(entity, id, includes, params) {
         includes = includes || [];
@@ -73,13 +118,15 @@
         return makeRequest(url);
     };
 
-    const doSearchRequest = function(entity, query, fields, limit, offset) {
-        let params = { query };
-        if (fields) params.fields = fields;
+    const doSearchRequest = function(entity, query, fields, limit, offset, strict) {
+        let params = {};
         if (limit) params.limit = limit;
         if (offset) params.offset = offset;
+        params.query = makeSearchQuery(query, fields, strict);
 
         let url = makeUrl(entity, params);
+
+        console.log(url);
 
         return makeRequest(url);
     };
@@ -107,8 +154,8 @@
             return doQueryRequest(resource, id, includes, params);
         };
 
-        MusicBrainzClient.prototype[searchMethodName] = function(query, fields, limit, offset) {
-            return doSearchRequest(resource, query, fields, limit, offset);
+        MusicBrainzClient.prototype[searchMethodName] = function(query, fields, limit, offset, strict) {
+            return doSearchRequest(resource, query, fields, limit, offset, strict);
         };
     });
 
