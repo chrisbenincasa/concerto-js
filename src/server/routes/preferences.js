@@ -37,16 +37,7 @@
         router.post('/', function *(next) {
             let body = this.request.body;
             if (body.chosenFilePath) {
-                let resp = yield walkDirectory(body.chosenFilePath);
-                resp.forEach(file => {
-                    id3({
-                        file,
-                        type: id3.OPEN_LOCAL
-                    }, (err, tags) => {
-                        console.log(err, tags);
-                    });
-                });
-                this.body = resp;
+                this.body = yield walkDirectory(body.chosenFilePath);
             }
 
             this.status = 200;

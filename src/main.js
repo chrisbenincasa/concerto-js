@@ -53,7 +53,7 @@ app.on('ready', () => {
     preferencesWindow = new BrowserWindow({ width: 500, height: 600, show: false, resizable: false });
 
     let launchPreferences = function() {
-        UserPreferences.loadFromFile('/Users/christianbenincasa/Desktop/prefs.json').then(() => {
+        UserPreferences.loadFromFile('../config.json').then(() => {
             preferencesWindow.loadURL('file://' + __dirname + '/views/preferences.html');
             preferencesWindow.show();
         }).catch((err) => {
