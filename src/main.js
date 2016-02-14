@@ -9,6 +9,7 @@ const Tray = electron.Tray;
 const nativeImage = electron.nativeImage;
 const UserPreferences = require('./preferences/userPreferences');
 const server = require('./server');
+const path = require('path');
 const Sequelize = require('sequelize');
 const db = new Sequelize('concerto', null, null, {
     dialect: 'sqlite'
@@ -53,7 +54,9 @@ app.on('ready', () => {
     preferencesWindow = new BrowserWindow({ width: 500, height: 600, show: false, resizable: false });
 
     let launchPreferences = function() {
-        UserPreferences.loadFromFile('../config.json').then(() => {
+        let configPath = path.resolve(__dirname, '../config.json');
+        console.log(configPath);
+        UserPreferences.loadFromFile(configPath).then(() => {
             preferencesWindow.loadURL('file://' + __dirname + '/views/preferences.html');
             preferencesWindow.show();
         }).catch((err) => {
