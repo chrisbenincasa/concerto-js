@@ -6,6 +6,7 @@
     const q = require('q');
     const fs = require('fs');
     const _ = require('underscore');
+    const id3 = require('id3js');
 
     const readDir = q.denodeify(fs.readdir);
     const stat = q.denodeify(fs.stat);
@@ -36,7 +37,16 @@
         router.post('/', function *(next) {
             let body = this.request.body;
             if (body.chosenFilePath) {
-                this.body = yield walkDirectory(body.chosenFilePath);
+                let resp = yield walkDirectory(body.chosenFilePath);
+                resp.forEach(file => {
+                    id3({
+                        file,
+                        type: id3.OPEN_LOCAL
+                    }, (err, tags) => {
+                        console.log(err, tags);
+                    });
+                });
+                this.body = resp;
             }
 
             this.status = 200;

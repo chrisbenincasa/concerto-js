@@ -30,7 +30,7 @@ app.on('ready', () => {
     let appInterfaceManuItem = new MenuItem({
         label: 'Launch Player',
         click() {
-            playerWindow.loadUrl(`file://${__dirname}/views/library.html`);
+            playerWindow.loadURL(`file://${__dirname}/views/library.html`);
             playerWindow.show();
         }
     });
@@ -46,7 +46,7 @@ app.on('ready', () => {
 
     let launchPreferences = function() {
         UserPreferences.loadFromFile('/Users/christianbenincasa/Desktop/prefs.json').then(() => {
-            preferencesWindow.loadUrl('file://' + __dirname + '/views/preferences.html');
+            preferencesWindow.loadURL('file://' + __dirname + '/views/preferences.html');
             preferencesWindow.show();
         }).catch((err) => {
             console.error(err);
