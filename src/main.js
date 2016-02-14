@@ -9,6 +9,15 @@ const Tray = electron.Tray;
 const nativeImage = electron.nativeImage;
 const UserPreferences = require('./preferences/userPreferences');
 const server = require('./server');
+const path = require('path');
+const Sequelize = require('sequelize');
+const db = new Sequelize('concerto', null, null, {
+    dialect: 'sqlite'
+    //storage: __dirname + '/database.sqlite'
+});
+
+// Init the DB
+require('./db')(db);
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
@@ -30,7 +39,7 @@ app.on('ready', () => {
     let appInterfaceManuItem = new MenuItem({
         label: 'Launch Player',
         click() {
-            playerWindow.loadUrl(`file://${__dirname}/views/library.html`);
+            playerWindow.loadURL(`file://${__dirname}/views/library.html`);
             playerWindow.show();
         }
     });
@@ -45,8 +54,10 @@ app.on('ready', () => {
     preferencesWindow = new BrowserWindow({ width: 500, height: 600, show: false, resizable: false });
 
     let launchPreferences = function() {
-        UserPreferences.loadFromFile('/Users/christianbenincasa/Desktop/prefs.json').then(() => {
-            preferencesWindow.loadUrl('file://' + __dirname + '/views/preferences.html');
+        let configPath = path.resolve(__dirname, '../config.json');
+        console.log(configPath);
+        UserPreferences.loadFromFile(configPath).then(() => {
+            preferencesWindow.loadURL('file://' + __dirname + '/views/preferences.html');
             preferencesWindow.show();
         }).catch((err) => {
             console.error(err);

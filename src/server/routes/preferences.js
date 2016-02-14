@@ -6,6 +6,9 @@
     const q = require('q');
     const fs = require('fs');
     const _ = require('underscore');
+    const AV = require('av');
+    const mp3 = require('mp3');
+    const flac = require('flac.js');
 
     const readDir = q.denodeify(fs.readdir);
     const stat = q.denodeify(fs.stat);
@@ -36,7 +39,17 @@
         router.post('/', function *(next) {
             let body = this.request.body;
             if (body.chosenFilePath) {
-                this.body = yield walkDirectory(body.chosenFilePath);
+                let res = yield walkDirectory(body.chosenFilePath);
+
+                res.forEach((file) => {
+                    let asset = AV.Asset.fromFile(file);
+
+                    asset.get('metadata', (p) => {
+                        console.log(p);
+                    });
+                });
+
+                this.body = res;
             }
 
             this.status = 200;
