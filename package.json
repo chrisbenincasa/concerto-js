@@ -55,6 +55,7 @@
     "react": "^0.14.6",
     "react-dom": "^0.14.6",
     "request": "^2.69.0",
+    "sequelize": "^3.19.2",
     "sqlite3": "https://github.com/mapbox/node-sqlite3/tarball/master",
     "superagent": "^1.6.1",
     "underscore": "^1.8.3"
