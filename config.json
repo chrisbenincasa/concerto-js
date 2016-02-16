@@ -1,4 +1,12 @@
 {
     "directory": "~/Music/concerto",
-    "library": "library.sqlite"
+    "library": "library.sqlite",
+    "ignore": [
+        ".*",
+        "*~"
+    ],
+    "import": {
+        "link": true,
+        "dry": true
+    }
 }

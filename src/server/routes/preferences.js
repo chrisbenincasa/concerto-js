@@ -2,31 +2,44 @@
     "use strict";
 
     const Router = require('koa-router');
-    const async = require('async');
     const q = require('q');
     const fs = require('fs');
-    const _ = require('underscore');
-    const AV = require('av');
-    const mp3 = require('mp3');
-    const flac = require('flac.js');
+    const ImportSession = require('../../import/ImportSession');
+    const highland = require('highland');
 
-    const readDir = q.denodeify(fs.readdir);
-    const stat = q.denodeify(fs.stat);
-    const asyncMap = q.denodeify(async.map);
+    const readDirStream = highland.wrapCallback(fs.readdir);
+    const statStream = highland.wrapCallback(fs.stat);
 
     const walkDirectory = function(directory) {
-        return readDir(directory).then(data => {
-            let paths = data.map(entry => `${directory}/${entry}`);
-            return asyncMap(paths, (item, cb) => {
-                stat(item).then(statObj => {
-                    if (statObj.isDirectory()) {
-                        walkDirectory(item).then(result => cb(null, result)).catch(err => cb(err));
-                    } else if (statObj.isFile()) {
-                        cb(null, item);
-                    }
+        return readDirStream(directory).
+            flatMap(data => {
+                return highland(data.map(entry => `${directory}/${entry}`));
+            }).
+            flatMap(file => {
+                return statStream(file).map(statObj => {
+                    return [file, statObj];
                 });
-            }).then(result => _(result).flatten());
-        });
+            }).
+            flatMap(fileAndStatObj => {
+                let file = fileAndStatObj[0];
+                let statObj = fileAndStatObj[1];
+                if (statObj.isDirectory()) {
+                    return walkDirectory(file);
+                } else {
+                    return highland([file]);
+                }
+            });
+    };
+
+    const streamToPromise = function(stream) {
+        let defer = q.defer();
+        try {
+            stream.toArray(arr => defer.resolve(arr));
+        } catch (e) {
+            defer.reject(e);
+        }
+
+        return defer.promise;
     };
 
     module.exports = () => {
@@ -39,15 +52,10 @@
         router.post('/', function *(next) {
             let body = this.request.body;
             if (body.chosenFilePath) {
-                let res = yield walkDirectory(body.chosenFilePath);
+                let res = yield streamToPromise(walkDirectory(body.chosenFilePath));
 
-                res.forEach((file) => {
-                    let asset = AV.Asset.fromFile(file);
-
-                    asset.get('metadata', (p) => {
-                        console.log(p);
-                    });
-                });
+                //let session = new ImportSession(null, null, res);
+                //session.run();
 
                 this.body = res;
             }

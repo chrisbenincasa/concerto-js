@@ -76,4 +76,6 @@ app.on('ready', () => {
     appIcon.setContextMenu(contextMenu);
 
     server.run();
+
+    launchPreferences();
 });
