@@ -21,3 +21,5 @@ dist/
 
 # NPM
 npm-debug.log
+
+*.sqlite
