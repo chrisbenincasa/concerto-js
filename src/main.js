@@ -10,14 +10,7 @@ const nativeImage = electron.nativeImage;
 const UserPreferences = require('./preferences/userPreferences');
 const server = require('./server');
 const path = require('path');
-const Sequelize = require('sequelize');
-const db = new Sequelize('concerto', null, null, {
-    dialect: 'sqlite'
-    //storage: __dirname + '/database.sqlite'
-});
-
-// Init the DB
-require('./db')(db);
+require('./db');
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {

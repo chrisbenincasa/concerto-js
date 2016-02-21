@@ -1,8 +1,17 @@
 (function() {
     "use strict";
 
+    const UNIX_DIR_VAR = 'XDG_CONFIG_HOME';
+    const UNIX_DIR_FALLBACK = '~/.config';
+    const WINDOWS_DIR_VAR = 'APPDATA';
+    const WINDOWS_DIR_FALLBACK = '~\\AppData\\Roaming';
+    const MAC_DIR = '~/Library/Application Support';
+    const CONFIG_FILENAME = 'config.yaml';
+    const DEFAULT_FILENAME = 'config_default.yaml';
+
     const fs = require('fs');
     const q = require('q');
+    const utils = require('../utils');
     const FOUR_SPACES = '    ';
 
     let globalPreferences;
@@ -30,7 +39,7 @@
         static getGlobalPreferences() {
             if (!globalPreferences) {
                 // TODO: Add file path
-                return UserPreferences.loadFromFile('/Users/christianbenincasa/Desktop/prefs.json').then((json) => {
+                return UserPreferences.loadFromFile(`${utils.APP_ROOT}/config.json`).then((json) => {
                     globalPreferences = json;
                     return json;
                 });
@@ -41,7 +50,7 @@
 
         static saveGlobalPreferences(newJson) {
             let saveFileAsync = () => {
-                return writeFile('/Users/christianbenincasa/Desktop/prefs.json', JSON.stringify(newJson, null, FOUR_SPACES));
+                return writeFile(`${utils.APP_ROOT}/config.json`, JSON.stringify(newJson, null, FOUR_SPACES));
             };
 
             let promise = globalPreferences ? q.when(globalPreferences) : UserPreferences.getGlobalPreferences();

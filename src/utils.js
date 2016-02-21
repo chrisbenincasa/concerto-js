@@ -2,9 +2,9 @@
 
 const path = require('path');
 const q = require('q');
+const APP_ROOT = path.resolve(__dirname, '..');
 
 function requireRoot(fileName) {
-    console.log(__dirname, process.cwd());
     let abs = path.resolve(__dirname, fileName);
     return require(abs);
 }
@@ -20,5 +20,7 @@ function snakeToCamel(str) {
 module.exports = {
     requireRoot,
     dashToCamel,
-    snakeToCamel
+    snakeToCamel,
+    SOURCE_ROOT: __dirname,
+    APP_ROOT
 };

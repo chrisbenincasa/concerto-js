@@ -4,6 +4,8 @@
     const Router = require('koa-router');
     const q = require('q');
     const fs = require('fs');
+    const utils = require('../../utils');
+    const UserPreferences = utils.requireRoot('./preferences/userPreferences');
     const ImportSession = require('../../import/ImportSession');
     const highland = require('highland');
 
@@ -46,18 +48,21 @@
         const router = new Router({ prefix: '/preferences' });
 
         router.get('/', function *() {
-            yield this.render('preferences');
+            this.body = yield UserPreferences.getGlobalPreferences();
         });
 
         router.post('/', function *(next) {
             let body = this.request.body;
-            if (body.chosenFilePath) {
-                let res = yield streamToPromise(walkDirectory(body.chosenFilePath));
+            //yield UserPreferences.saveGlobalPreferences(body);
+            console.log(body)
+            if (body.directory) {
+                let pathsPromise = streamToPromise(walkDirectory(body.directory));
+                pathsPromise.then(paths => {
+                    let session = new ImportSession(null, null, paths);
+                    session.run();
+                });
 
-                //let session = new ImportSession(null, null, res);
-                //session.run();
-
-                this.body = res;
+                this.body = yield pathsPromise;
             }
 
             this.status = 200;

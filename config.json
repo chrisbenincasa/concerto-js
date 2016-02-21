@@ -1,12 +1,12 @@
 {
-    "directory": "~/Music/concerto",
+    "directory": "/Users/christianbenincasa/Music/unconverted",
     "library": "library.sqlite",
     "ignore": [
         ".*",
         "*~"
     ],
     "import": {
-        "link": true,
-        "dry": true
+        "link": "true",
+        "dry": "true"
     }
 }

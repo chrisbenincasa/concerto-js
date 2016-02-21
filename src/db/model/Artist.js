@@ -4,7 +4,7 @@
 const Sequelize = require('sequelize');
 
 module.exports = function(db) {
-    return db.define('artist', {
+    return db.define('Artist', {
         id: {
             type: Sequelize.INTEGER,
             primaryKey: true,
@@ -17,5 +17,7 @@ module.exports = function(db) {
             type: Sequelize.STRING,
             field: 'mb_artist_id'
         }
+    }, {
+        tableName: 'artists'
     });
 };

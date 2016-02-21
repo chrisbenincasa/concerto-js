@@ -5,7 +5,11 @@ const React = require('react'),
 
 let Library = React.createClass({
     componentWillMount() {
-        q($.getJSON('/', null)).then((resp) => console.log(resp));
+        $.getJSON('/', null).then((resp) => console.log(resp));
+
+        $.getJSON('/library/songs', null).then(resp => {
+            console.log(resp);
+        });
     },
     render() {
         return (

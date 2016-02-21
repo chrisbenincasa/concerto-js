@@ -1,6 +1,6 @@
 const React = require('react'),
       ReactDOM = require('react-dom'),
-      UserPreferences = require('./userPreferences'),
+      update = require('react-addons-update'),
       FileInput = require('../common/FileInput'),
       $ = require('jquery');
 
@@ -8,7 +8,11 @@ var PreferencesPanel = React.createClass({
     componentDidMount() {
         let self = this;
 
-        UserPreferences.getGlobalPreferences().then((prefs) => {
+        $.ajax({
+            url: 'http://localhost:3000/preferences',
+            method: 'GET',
+            dataType: 'json'
+        }).then((prefs) => {
             self.setState({
                 loading: false,
                 config: prefs.raw,
@@ -23,24 +27,21 @@ var PreferencesPanel = React.createClass({
             loading: true
         }
     },
-    handleDirectoryChosen(e) {
-        this.setState({ config: { chosenFilePath: e.target.files[0].path }}, () => {
-            $.ajax({
-                url: 'http://localhost:3000/preferences',
-                method: 'POST',
-                data: this.state.config
-            });
+    saveConfig() {
+        $.ajax({
+            url: 'http://localhost:3000/preferences',
+            method: 'POST',
+            data: this.state.config
         });
     },
-    handleApply() {
-        let self = this;
-        let prefs = {
-            chosenFilePath: this.state.chosenFilePath
-        };
-
-        UserPreferences.saveGlobalPreferences(prefs).then((newPrefs) => {
-            self.setState({ config: newPrefs.raw });
+    handleDirectoryChosen(e) {
+        let newState = update(this.state, {
+            config: {
+                directory: { $set: e.target.files[0].path }
+            }
         });
+
+        this.setState(newState);
     },
     render() {
         let loading;
@@ -55,10 +56,10 @@ var PreferencesPanel = React.createClass({
             <div className="preferences-container">
                 {loading}
                 <br/>
-                Chosen filepath = {this.state.config.chosenFilePath}
-                <FileInput directory="true" onChange={this.handleDirectoryChosen} value={this.state.config.chosenFilePath} />
+                Chosen filepath = {this.state.config.directory}
+                <FileInput directory="true" onChange={this.handleDirectoryChosen} value={this.state.config.directory} />
                 <div>
-                    <button onClick={this.handleApply}>Apply</button>
+                    <button onClick={this.saveConfig}>Apply</button>
                 </div>
             </div>
         );

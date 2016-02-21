@@ -1,7 +1,17 @@
 
 'use strict';
 
-const _ = require('underscore');
+const fs = require('fs');
+const path = require('path');
+const Sequelize = require('sequelize');
+const utils = require('../utils');
+const sequelize = new Sequelize('concerto', null, null, {
+    dialect: 'sqlite',
+    storage: utils.SOURCE_ROOT + '/database.sqlite'
+});
+let db = {
+    model: {}
+};
 
 const initAssociations = function(model) {
     // Item relations
@@ -9,7 +19,7 @@ const initAssociations = function(model) {
         foreignKey: 'album_id'
     });
     model.Item.belongsToMany(model.Tag, {
-        through: 'ItamTags'
+        through: 'ItemTags'
     });
     model.Item.hasOne(model.Artist, {
         foreignKey: 'artist_id'
@@ -35,12 +45,24 @@ const initAssociations = function(model) {
     });
 };
 
-module.exports = function(db) {
-    const model = require('./model')(db);
+fs.readdirSync(`${__dirname}/model`).
+    filter(function(file) {
+        return (file.indexOf(".") !== 0) && (file !== "index.js");
+    }).
+    forEach(function(file) {
+        var model = sequelize.import(path.join(`${__dirname}/model`, file));
+        db.model[model.name] = model;
+    });
 
-    initAssociations(model);
+initAssociations(db.model);
 
-    _(model).chain().values().each((m) => m.sync());
-};
+Object.keys(db.model).forEach(function(model) {
+    db.model[model].sync();
+});
+
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
+
+module.exports = db;
 
 

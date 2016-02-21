@@ -4,7 +4,7 @@
 const Sequelize = require('sequelize');
 
 module.exports = function(db) {
-    return db.define('item', {
+    return db.define('Item', {
         id: {
             type: Sequelize.INTEGER,
             primaryKey: true,
@@ -41,5 +41,7 @@ module.exports = function(db) {
             type: Sequelize.STRING,
             field: 'acoustid_id'
         }
+    }, {
+        tableName: 'items'
     });
 };

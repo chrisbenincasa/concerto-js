@@ -4,7 +4,7 @@
 const Sequelize = require('sequelize');
 
 module.exports = function(db) {
-    return db.define('tag', {
+    return db.define('Tag', {
         id: {
             type: Sequelize.INTEGER,
             primaryKey: true,
@@ -13,5 +13,7 @@ module.exports = function(db) {
         name: {
             type: Sequelize.STRING
         }
+    }, {
+        tableName: 'tags'
     });
 };
