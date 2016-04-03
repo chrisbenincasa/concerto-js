@@ -8,6 +8,7 @@
     const _ = require('underscore');
     const q = require('q');
     const concertoUtils = require('../../utils');
+    const $ = require('highland');
 
     const RESOURCES = [
         'area',
@@ -34,7 +35,9 @@
         return `${MAIN_ENDPOINT}${path}?${query}`;
     };
 
-    const makeRequest = _.throttle(function(url) {
+    const makeRequest = function(url) {
+        console.log('Making request to Musicbrainz at + ' + new Date());
+
         let deferred = q.defer();
 
         let requestOptions = {
@@ -44,10 +47,11 @@
             }
         };
 
-        request(requestOptions, (err, response) => {
-            console.log(response.body);
+        console.log('Requesting ' + JSON.stringify(requestOptions));
 
+        request(requestOptions, (err, response) => {
             if (err) {
+                console.warn(err);
                 deferred.reject(err, response);
                 return;
             }
@@ -56,7 +60,7 @@
         });
 
         return deferred.promise;
-    }, 1000);
+    };
 
     const makeSearchQuery = function(query, fields, strict) {
         let queryParts = [];
@@ -131,7 +135,59 @@
         return makeRequest(url);
     };
 
-    class MusicBrainzClient {}
+    class MusicBrainzClient {
+        constructor() {
+            let self = this;
+
+            this._requestStream = $().ratelimit(1, 1500);
+
+            this._requestStream.each(request => {
+                request.fn().then(res => {
+                    request.onSuccess(res);
+                }).catch(err => {
+                    request.onError(err);
+
+                    if (request.shouldRetry()) {
+                        self.submitRequest(request);
+                    }
+                });
+            });
+        }
+
+        submitRequest(request) {
+            this._requestStream.write(request);
+        }
+    }
+
+    class MusicBrainzRequest {
+        constructor(fn, retries) {
+            this._deferred = q.defer();
+            this.fn = fn;
+            this.promise = this._deferred.promise;
+            this.retries = _.isNumber(retries) ? retries : 3;
+        }
+
+        execute(client) {
+            client.submitRequest(this);
+            return this.promise;
+        }
+
+        onSuccess(res) {
+            this._deferred.resolve(res);
+        }
+
+        onError(err) {
+            this.retries--;
+
+            if (this.retries === 0) {
+                this._deferred.reject(err);
+            }
+        }
+
+        shouldRetry() {
+            return this.retries > 0;
+        }
+    }
 
     // Attach search endpoints for each resource
     RESOURCES.forEach(resource => {
@@ -151,11 +207,11 @@
                 type: releaseType.join('|')
             };
 
-            return doQueryRequest(resource, id, includes, params);
+            return new MusicBrainzRequest(() => doQueryRequest(resource, id, includes, params)).execute(this);
         };
 
         MusicBrainzClient.prototype[searchMethodName] = function(query, fields, limit, offset, strict) {
-            return doSearchRequest(resource, query, fields, limit, offset, strict);
+            return new MusicBrainzRequest(() => doSearchRequest(resource, query, fields, limit, offset, strict)).execute(this);
         };
     });
 

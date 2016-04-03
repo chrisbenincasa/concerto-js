@@ -9,6 +9,9 @@ const q = require('q');
 const AV = require('av');
 const mp3 = require('mp3');
 const flac = require('flac.js');
+const MusicBrainzClient = require('../common/musicbrainz');
+
+const client = new MusicBrainzClient();
 
 const metadataStream = function(file) {
     let deferred = q.defer();
@@ -18,6 +21,20 @@ const metadataStream = function(file) {
     asset.get('metadata', deferred.resolve);
 
     return highland(deferred.promise).errors(function(err, push) { push(null, {}); });
+};
+
+const musicbrainzStream = function(albumEntries, albumName) {
+    console.log('getting ' + albumName + '...');
+
+    let promise = client.searchRelease(albumName, { artist: albumEntries[0].artist }).then(resp => {
+        return {
+            albumName,
+            originalEntires: albumEntries,
+            musicbrainzResponse: resp
+        }
+    });
+
+    return highland(promise);
 };
 
 class ImportSession {
@@ -31,6 +48,9 @@ class ImportSession {
         return highland(this.paths).
             flatMap(metadataStream).
             filter(_.negate(_.isEmpty)).
+            group('album').
+            map(groups => _(groups).map(musicbrainzStream)).
+            flatten().
             toArray(highland.log);
     }
 }
